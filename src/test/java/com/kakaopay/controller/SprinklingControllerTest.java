@@ -17,6 +17,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import reactor.core.publisher.Mono;
 
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
 import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
@@ -195,13 +196,16 @@ class SprinklingControllerTest {
     int userId = 900001;
     int receivingUserId = 900002;
     String roomId = "TEST-ROOM";
-    String token = sprinklingService.sprinkle(amount, people, userId, roomId);
-    long receivedAmount = receivingService.receive(token, receivingUserId, roomId);
+    Mono<String> tokenMono = sprinklingService.sprinkle(amount, people, userId, roomId);
+    long receivedAmount = receivingService.receive("", receivingUserId, roomId);
+
+    // TODO: Mono 적용
+    //    long receivedAmount = receivingService.receive(tokenMono, receivingUserId, roomId);
 
     // When
     final ResultActions actions =
         mockMvc.perform(
-            get("/v1/sprinklings/{token}", token)
+            get("/v1/sprinklings/{token}", tokenMono)
                 .header("X-USER-ID", userId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaTypes.HAL_JSON));

@@ -13,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import reactor.core.publisher.Mono;
 
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
 import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
@@ -51,12 +52,12 @@ class ReceivingControllerTest {
     int userId = 900001;
     int receivingUserId = 900002;
     String roomId = "TEST-ROOM";
-    String token = sprinklingService.sprinkle(amount, people, userId, roomId);
+    Mono<String> tokenMono = sprinklingService.sprinkle(amount, people, userId, roomId);
 
     // When
     final ResultActions actions =
         mockMvc.perform(
-            put("/v1/receivings/{token}", token)
+            put("/v1/receivings/{token}", tokenMono)
                 .header("X-USER-ID", receivingUserId)
                 .header("X-ROOM-ID", roomId)
                 .contentType(MediaType.APPLICATION_JSON)

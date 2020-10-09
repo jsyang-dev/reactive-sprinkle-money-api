@@ -13,6 +13,7 @@ import com.kakaopay.util.RandomUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Mono;
 
 @Service
 @RequiredArgsConstructor
@@ -23,7 +24,7 @@ public class SprinklingServiceImpl implements SprinklingService {
 
   @Override
   @Transactional
-  public String sprinkle(long amount, int people, int userId, String roomId) {
+  public Mono<String> sprinkle(long amount, int people, int userId, String roomId) {
 
     if (amount < people) {
       throw new InsufficientAmountException(amount, people);
@@ -40,7 +41,7 @@ public class SprinklingServiceImpl implements SprinklingService {
 
     makeReceivingInSprinkling(amount, people, sprinkling);
 
-    return sprinklingRepository.save(sprinkling).getToken();
+    return Mono.just(sprinklingRepository.save(sprinkling).getToken());
   }
 
   @Override

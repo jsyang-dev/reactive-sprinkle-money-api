@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
@@ -32,28 +33,34 @@ public class SprinklingController {
   private final SprinklingService sprinklingService;
 
   @PostMapping
-  public ResponseEntity<Response> distribute(
+  public Mono<ResponseEntity<Response>> distribute(
       @RequestHeader("X-USER-ID") @Positive int userId,
       @RequestHeader("X-ROOM-ID") @NotBlank String roomID,
       @RequestBody @Valid Request request) {
 
-    String token =
-        sprinklingService.sprinkle(request.getAmount(), request.getPeople(), userId, roomID);
-
-    Response response =
-        Response.builder()
-            .token(token)
-            .build()
-            .add(linkTo(SprinklingController.class).withSelfRel())
-            .add(
-                linkTo(methodOn(ReceivingController.class).receive(token, userId, roomID))
-                    .withRel("receiving"))
-            .add(linkTo(methodOn(SprinklingController.class).read(token, userId)).withRel("read"))
-            .add(Link.of("/docs/index.html#sprinkling").withRel("profile"));
-
-    return ResponseEntity.created(
-            linkTo(methodOn(SprinklingController.class).read(token, userId)).toUri())
-        .body(response);
+    return sprinklingService
+        .sprinkle(request.getAmount(), request.getPeople(), userId, roomID)
+        .map(
+            token ->
+                Response.builder()
+                    .token(token)
+                    .build()
+                    .add(linkTo(SprinklingController.class).withSelfRel())
+                    .add(
+                        linkTo(methodOn(ReceivingController.class).receive(token, userId, roomID))
+                            .withRel("receiving"))
+                    .add(
+                        linkTo(methodOn(SprinklingController.class).read(token, userId))
+                            .withRel("read"))
+                    .add(Link.of("/docs/index.html#sprinkling").withRel("profile")))
+        .map(
+            response ->
+                ResponseEntity.created(
+                        linkTo(
+                                methodOn(SprinklingController.class)
+                                    .read(response.getToken(), userId))
+                            .toUri())
+                    .body(response));
   }
 
   @GetMapping("/{token}")

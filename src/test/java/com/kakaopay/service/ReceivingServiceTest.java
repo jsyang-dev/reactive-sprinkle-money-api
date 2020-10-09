@@ -41,7 +41,9 @@ class ReceivingServiceTest {
     people = 3;
     userId = 900001;
     roomId = "TEST-ROOM";
-    token = sprinklingService.sprinkle(amount, people, userId, roomId);
+    token = "";
+    // TODO
+    // sprinklingService.sprinkle(amount, people, userId, roomId);
   }
 
   @Test

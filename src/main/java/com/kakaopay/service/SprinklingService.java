@@ -1,6 +1,7 @@
 package com.kakaopay.service;
 
 import com.kakaopay.dto.ReadDto.SprinklingDto;
+import reactor.core.publisher.Mono;
 
 public interface SprinklingService {
 
@@ -13,7 +14,7 @@ public interface SprinklingService {
    * @param roomId 뿌린 대화방 ID
    * @return 뿌리기 token
    */
-  String sprinkle(long amount, int people, int userId, String roomId);
+  Mono<String> sprinkle(long amount, int people, int userId, String roomId);
 
   /**
    * 머니 뿌리기 조회
