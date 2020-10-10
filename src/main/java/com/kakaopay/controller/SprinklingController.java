@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
@@ -23,6 +24,7 @@ import static com.kakaopay.dto.SprinklingDto.Request;
 import static com.kakaopay.dto.SprinklingDto.Response;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+import static org.springframework.web.reactive.function.server.EntityResponse.fromObject;
 
 @RestController
 @RequestMapping("/v1/sprinklings")
@@ -33,7 +35,7 @@ public class SprinklingController {
   private final SprinklingService sprinklingService;
 
   @PostMapping
-  public Mono<ResponseEntity<Response>> distribute(
+  public Mono<ServerResponse> distribute(
       @RequestHeader("X-USER-ID") @Positive int userId,
       @RequestHeader("X-ROOM-ID") @NotBlank String roomID,
       @RequestBody @Valid Request request) {
@@ -53,14 +55,14 @@ public class SprinklingController {
                         linkTo(methodOn(SprinklingController.class).read(token, userId))
                             .withRel("read"))
                     .add(Link.of("/docs/index.html#sprinkling").withRel("profile")))
-        .map(
+        .flatMap(
             response ->
-                ResponseEntity.created(
+                ServerResponse.created(
                         linkTo(
                                 methodOn(SprinklingController.class)
                                     .read(response.getToken(), userId))
                             .toUri())
-                    .body(response));
+                    .body(response, Response.class));
   }
 
   @GetMapping("/{token}")
