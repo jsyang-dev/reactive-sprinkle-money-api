@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.hateoas.RepresentationModel;
 
 import javax.validation.constraints.Positive;
 
@@ -28,7 +27,7 @@ public class SprinklingDto {
   @Builder
   @AllArgsConstructor
   @NoArgsConstructor(access = AccessLevel.PROTECTED)
-  public static class Response extends RepresentationModel<Response> {
+  public static class Response {
 
     private String token;
   }

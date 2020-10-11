@@ -3,7 +3,6 @@ package com.kakaopay.controller;
 import com.kakaopay.dto.ReceivingDto;
 import com.kakaopay.service.ReceivingService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.hateoas.Link;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,9 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Positive;
-
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 @RequestMapping("/v1/receivings")
@@ -34,16 +30,7 @@ public class ReceivingController {
 
     long receivedAmount = receivingService.receive(token, userId, roomID);
 
-    ReceivingDto receivingResDto =
-        ReceivingDto.builder()
-            .amount(receivedAmount)
-            .build()
-            .add(
-                linkTo(methodOn(ReceivingController.class).receive(token, userId, roomID))
-                    .withSelfRel())
-            .add(linkTo(SprinklingController.class).withRel("sprinkling"))
-            .add(linkTo(methodOn(SprinklingController.class).read(token, userId)).withRel("read"))
-            .add(Link.of("/docs/index.html#receiving").withRel("profile"));
+    ReceivingDto receivingResDto = ReceivingDto.builder().amount(receivedAmount).build();
 
     return ResponseEntity.ok(receivingResDto);
   }

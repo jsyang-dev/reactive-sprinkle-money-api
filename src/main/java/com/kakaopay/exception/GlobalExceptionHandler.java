@@ -19,11 +19,11 @@ import java.util.stream.Collectors;
 @Slf4j
 public class GlobalExceptionHandler {
 
-  @ExceptionHandler(MissingRequestHeaderException.class)
-  protected ResponseEntity<ApiError> handle(MissingRequestHeaderException e) {
-    ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST, "필수 Header 정보가 누락되었습니다.", e);
-    return new ResponseEntity<>(apiError, apiError.getStatus());
-  }
+  //  @ExceptionHandler(MissingRequestHeaderException.class)
+  //  protected ResponseEntity<ApiError> handle(MissingRequestHeaderException e) {
+  //    ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST, "필수 Header 정보가 누락되었습니다.", e);
+  //    return new ResponseEntity<>(apiError, apiError.getStatus());
+  //  }
 
   @ExceptionHandler(ConstraintViolationException.class)
   protected ResponseEntity<ApiError> handle(ConstraintViolationException e) {

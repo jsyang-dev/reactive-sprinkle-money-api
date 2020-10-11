@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -64,7 +63,6 @@ class SprinklingControllerTest {
                 .header("X-USER-ID", 900001)
                 .header("X-ROOM-ID", "TEST-ROOM")
                 .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaTypes.HAL_JSON)
                 .content(objectMapper.writeValueAsString(request)));
 
     // Then
@@ -72,7 +70,6 @@ class SprinklingControllerTest {
         .andDo(print())
         .andExpect(status().isCreated())
         .andExpect(header().exists(HttpHeaders.LOCATION))
-        .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_VALUE))
         .andExpect(jsonPath("token").isNotEmpty())
         .andExpect(jsonPath("_links.self").exists())
         .andExpect(jsonPath("_links.receiving").exists())
@@ -113,14 +110,12 @@ class SprinklingControllerTest {
         mockMvc.perform(
             post("/v1/sprinklings")
                 .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaTypes.HAL_JSON)
                 .content(objectMapper.writeValueAsString(request)));
 
     // Then
     actions
         .andDo(print())
         .andExpect(status().isBadRequest())
-        .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_VALUE))
         .andExpect(jsonPath("timestamp").exists())
         .andExpect(jsonPath("status").value(HttpStatus.BAD_REQUEST.name()))
         .andExpect(jsonPath("message").exists())
@@ -142,14 +137,12 @@ class SprinklingControllerTest {
                 .header("X-USER-ID", 0)
                 .header("X-ROOM-ID", "")
                 .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaTypes.HAL_JSON)
                 .content(objectMapper.writeValueAsString(request)));
 
     // Then
     actions
         .andDo(print())
         .andExpect(status().isBadRequest())
-        .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_VALUE))
         .andExpect(jsonPath("timestamp").exists())
         .andExpect(jsonPath("status").value(HttpStatus.BAD_REQUEST.name()))
         .andExpect(jsonPath("message").exists())
@@ -171,14 +164,12 @@ class SprinklingControllerTest {
                 .header("X-USER-ID", 900001)
                 .header("X-ROOM-ID", "TEST-ROOM")
                 .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaTypes.HAL_JSON)
                 .content(objectMapper.writeValueAsString(request)));
 
     // Then
     actions
         .andDo(print())
         .andExpect(status().isBadRequest())
-        .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_VALUE))
         .andExpect(jsonPath("timestamp").exists())
         .andExpect(jsonPath("status").value(HttpStatus.BAD_REQUEST.name()))
         .andExpect(jsonPath("message").exists())
@@ -207,14 +198,12 @@ class SprinklingControllerTest {
         mockMvc.perform(
             get("/v1/sprinklings/{token}", tokenMono)
                 .header("X-USER-ID", userId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaTypes.HAL_JSON));
+                .contentType(MediaType.APPLICATION_JSON));
 
     // Then
     actions
         .andDo(print())
         .andExpect(status().isOk())
-        .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_VALUE))
         .andExpect(jsonPath("createDate").isNotEmpty())
         .andExpect(jsonPath("totalAmount").value(amount))
         .andExpect(jsonPath("receivedAmount").value(receivedAmount))

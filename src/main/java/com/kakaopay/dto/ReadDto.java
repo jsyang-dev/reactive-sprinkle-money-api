@@ -6,7 +6,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.hateoas.RepresentationModel;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -20,8 +19,7 @@ public class ReadDto {
   @Setter
   @Builder
   @AllArgsConstructor
-  public static class SprinklingDto extends RepresentationModel<SprinklingDto>
-      implements Serializable {
+  public static class SprinklingDto implements Serializable {
 
     private LocalDateTime createDate;
 

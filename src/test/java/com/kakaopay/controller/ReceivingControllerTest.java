@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
@@ -60,14 +59,12 @@ class ReceivingControllerTest {
             put("/v1/receivings/{token}", tokenMono)
                 .header("X-USER-ID", receivingUserId)
                 .header("X-ROOM-ID", roomId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaTypes.HAL_JSON));
+                .contentType(MediaType.APPLICATION_JSON));
 
     // Then
     actions
         .andDo(print())
         .andExpect(status().isOk())
-        .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_VALUE))
         .andExpect(jsonPath("amount").isNumber())
         .andExpect(jsonPath("_links.self").exists())
         .andExpect(jsonPath("_links.sprinkling").exists())
