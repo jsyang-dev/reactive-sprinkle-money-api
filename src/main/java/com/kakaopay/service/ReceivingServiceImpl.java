@@ -12,6 +12,7 @@ import com.kakaopay.repository.SprinklingRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Mono;
 
 @Service
 @RequiredArgsConstructor
@@ -21,7 +22,7 @@ public class ReceivingServiceImpl implements ReceivingService {
 
   @Override
   @Transactional
-  public long receive(String token, int userId, String roomId) {
+  public Mono<Long> receive(String token, int userId, String roomId) {
 
     Sprinkling sprinkling =
         sprinklingRepository
@@ -37,7 +38,7 @@ public class ReceivingServiceImpl implements ReceivingService {
             .orElseThrow(() -> new ReceivingCompletedException(token));
 
     remainReceiving.setUserId(userId);
-    return remainReceiving.getAmount();
+    return Mono.just(remainReceiving.getAmount());
   }
 
   private void validateReceiving(Sprinkling sprinkling, int userId, String roomId) {

@@ -33,7 +33,7 @@ public class SprinklingController {
   private final SprinklingService sprinklingService;
 
   @PostMapping
-  public Mono<ResponseEntity<Response>> distribute(
+  public Mono<ResponseEntity<Response>> sprinkle(
       @RequestHeader("X-USER-ID") @Positive int userId,
       @RequestHeader("X-ROOM-ID") @NotBlank String roomID,
       @RequestBody @Valid Request request) {
@@ -45,10 +45,11 @@ public class SprinklingController {
   }
 
   @GetMapping("/{token}")
-  public ResponseEntity<ReadDto.SprinklingDto> read(
+  public Mono<ResponseEntity<ReadDto.SprinklingDto>> read(
       @PathVariable String token, @RequestHeader("X-USER-ID") @Positive int userId) {
 
-    ReadDto.SprinklingDto sprinklingDto = sprinklingService.read(token, userId);
-    return ResponseEntity.ok(sprinklingDto);
+    return sprinklingService
+        .read(token, userId)
+        .flatMap(sprinklingDto -> Mono.just(new ResponseEntity<>(sprinklingDto, HttpStatus.OK)));
   }
 }

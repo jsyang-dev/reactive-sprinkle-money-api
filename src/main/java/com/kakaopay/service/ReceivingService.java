@@ -1,5 +1,7 @@
 package com.kakaopay.service;
 
+import reactor.core.publisher.Mono;
+
 public interface ReceivingService {
 
   /**
@@ -10,5 +12,5 @@ public interface ReceivingService {
    * @param roomId 대화방 ID
    * @return 받은 금액
    */
-  long receive(String token, int userId, String roomId);
+  Mono<Long> receive(String token, int userId, String roomId);
 }

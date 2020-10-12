@@ -1,239 +1,149 @@
 package com.kakaopay.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kakaopay.dto.ReadDto;
 import com.kakaopay.dto.SprinklingDto.Request;
-import com.kakaopay.service.ReceivingService;
 import com.kakaopay.service.SprinklingService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 
-import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
-import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
-import static org.springframework.restdocs.headers.HeaderDocumentation.responseHeaders;
-import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.linkWithRel;
-import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.links;
-import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
-import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessResponse;
-import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
-import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
-import static org.springframework.restdocs.payload.PayloadDocumentation.relaxedResponseFields;
-import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
-import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
-import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import java.time.LocalDateTime;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@AutoConfigureRestDocs(uriHost = "${app.host}")
+import static com.kakaopay.dto.SprinklingDto.Response;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(SpringExtension.class)
+@WebFluxTest(controllers = SprinklingController.class)
 @ActiveProfiles("test")
 class SprinklingControllerTest {
 
-  @Autowired private MockMvc mockMvc;
-  @Autowired private ObjectMapper objectMapper;
-  @Autowired private SprinklingService sprinklingService;
-  @Autowired private ReceivingService receivingService;
+  @Autowired private WebTestClient webClient;
+  @MockBean SprinklingService sprinklingService;
 
   @Test
   @DisplayName("뿌리기를 요청하고 token을 반환 받음")
-  void sprinkleTest() throws Exception {
+  void sprinkleTest() {
 
     // Given
     Request request = Request.builder().amount(20000).people(3).build();
 
-    // When
-    final ResultActions actions =
-        mockMvc.perform(
-            post("/v1/sprinklings")
-                .header("X-USER-ID", 900001)
-                .header("X-ROOM-ID", "TEST-ROOM")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)));
-
-    // Then
-    actions
-        .andDo(print())
-        .andExpect(status().isCreated())
-        .andExpect(header().exists(HttpHeaders.LOCATION))
-        .andExpect(jsonPath("token").isNotEmpty())
-        .andExpect(jsonPath("_links.self").exists())
-        .andExpect(jsonPath("_links.receiving").exists())
-        .andExpect(jsonPath("_links.read").exists())
-        .andExpect(jsonPath("_links.profile").exists())
-        .andDo(
-            document(
-                "sprinkling",
-                preprocessResponse(prettyPrint()),
-                links(
-                    linkWithRel("self").description("셀프 링크"),
-                    linkWithRel("receiving").description("받기 링크"),
-                    linkWithRel("read").description("조회 링크"),
-                    linkWithRel("profile").description("프로파일 링크")),
-                requestHeaders(
-                    headerWithName(HttpHeaders.ACCEPT).description("Accept 헤더"),
-                    headerWithName(HttpHeaders.CONTENT_TYPE).description("Content-type 헤더"),
-                    headerWithName("X-USER-ID").description("사용자 ID"),
-                    headerWithName("X-ROOM-ID").description("대화방 ID")),
-                requestFields(
-                    fieldWithPath("amount").description("뿌릴 금액"),
-                    fieldWithPath("people").description("뿌릴 인원")),
-                responseHeaders(
-                    headerWithName(HttpHeaders.LOCATION).description("Location 헤더"),
-                    headerWithName(HttpHeaders.CONTENT_TYPE).description("Content-type 헤더")),
-                relaxedResponseFields(fieldWithPath("token").description("뿌리기 token"))));
-  }
-
-  @Test
-  @DisplayName("요청 Header 누락 테스트")
-  void validateHeaderTest01() throws Exception {
-
-    // Given
-    Request request = Request.builder().amount(20000).people(3).build();
+    when(sprinklingService.sprinkle(20000, 3, 900001, "TEST-ROOM")).thenReturn(Mono.just("tst"));
 
     // When
-    final ResultActions actions =
-        mockMvc.perform(
-            post("/v1/sprinklings")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)));
+    WebTestClient.ResponseSpec responseSpec =
+        webClient
+            .post()
+            .uri("/v1/sprinklings")
+            .header("X-USER-ID", "900001")
+            .header("X-ROOM-ID", "TEST-ROOM")
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(Mono.just(request), Request.class)
+            .exchange();
 
     // Then
-    actions
-        .andDo(print())
-        .andExpect(status().isBadRequest())
-        .andExpect(jsonPath("timestamp").exists())
-        .andExpect(jsonPath("status").value(HttpStatus.BAD_REQUEST.name()))
-        .andExpect(jsonPath("message").exists())
-        .andExpect(jsonPath("debugMessage").exists())
-        .andExpect(jsonPath("subErrors").isEmpty());
-  }
-
-  @Test
-  @DisplayName("요청 Header 값 검증 테스트")
-  void validateHeaderTest02() throws Exception {
-
-    // Given
-    Request request = Request.builder().amount(20000).people(3).build();
-
-    // When
-    final ResultActions actions =
-        mockMvc.perform(
-            post("/v1/sprinklings")
-                .header("X-USER-ID", 0)
-                .header("X-ROOM-ID", "")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)));
-
-    // Then
-    actions
-        .andDo(print())
-        .andExpect(status().isBadRequest())
-        .andExpect(jsonPath("timestamp").exists())
-        .andExpect(jsonPath("status").value(HttpStatus.BAD_REQUEST.name()))
-        .andExpect(jsonPath("message").exists())
-        .andExpect(jsonPath("debugMessage").exists())
-        .andExpect(jsonPath("subErrors").isEmpty());
-  }
-
-  @Test
-  @DisplayName("요청 파라미터 값 검증 테스트")
-  void validateParameterTest() throws Exception {
-
-    // Given
-    Request request = Request.builder().amount(0).build();
-
-    // When
-    final ResultActions actions =
-        mockMvc.perform(
-            post("/v1/sprinklings")
-                .header("X-USER-ID", 900001)
-                .header("X-ROOM-ID", "TEST-ROOM")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)));
-
-    // Then
-    actions
-        .andDo(print())
-        .andExpect(status().isBadRequest())
-        .andExpect(jsonPath("timestamp").exists())
-        .andExpect(jsonPath("status").value(HttpStatus.BAD_REQUEST.name()))
-        .andExpect(jsonPath("message").exists())
-        .andExpect(jsonPath("debugMessage").isEmpty())
-        .andExpect(jsonPath("subErrors").exists());
+    responseSpec.expectStatus().isCreated().expectBody(Response.class);
   }
 
   @Test
   @DisplayName("조회를 요청하고 뿌리기 상태를 반환 받음")
-  void readTest() throws Exception {
+  void readTest() {
 
     // Given
-    long amount = 20000;
-    int people = 1;
-    int userId = 900001;
-    int receivingUserId = 900002;
-    String roomId = "TEST-ROOM";
-    Mono<String> tokenMono = sprinklingService.sprinkle(amount, people, userId, roomId);
-    long receivedAmount = receivingService.receive("", receivingUserId, roomId);
-
-    // TODO: Mono 적용
-    //    long receivedAmount = receivingService.receive(tokenMono, receivingUserId, roomId);
+    when(sprinklingService.read("tst", 900001))
+        .thenReturn(Mono.just(ReadDto.SprinklingDto.builder().build()));
 
     // When
-    final ResultActions actions =
-        mockMvc.perform(
-            get("/v1/sprinklings/{token}", tokenMono)
-                .header("X-USER-ID", userId)
-                .contentType(MediaType.APPLICATION_JSON));
+    WebTestClient.ResponseSpec responseSpec =
+        webClient
+            .get()
+            .uri("/v1/sprinklings/{token}", "tst")
+            .header("X-USER-ID", "900001")
+            .exchange();
 
     // Then
-    actions
-        .andDo(print())
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("createDate").isNotEmpty())
-        .andExpect(jsonPath("totalAmount").value(amount))
-        .andExpect(jsonPath("receivedAmount").value(receivedAmount))
-        .andExpect(jsonPath("receivingDtos[0].amount").value(receivedAmount))
-        .andExpect(jsonPath("receivingDtos[0].userId").value(receivingUserId))
-        .andExpect(jsonPath("_links.self").exists())
-        .andExpect(jsonPath("_links.sprinkling").exists())
-        .andExpect(jsonPath("_links.receiving").exists())
-        .andExpect(jsonPath("_links.profile").exists())
-        .andDo(
-            document(
-                "read",
-                preprocessResponse(prettyPrint()),
-                links(
-                    linkWithRel("self").description("셀프 링크"),
-                    linkWithRel("sprinkling").description("뿌리기 링크"),
-                    linkWithRel("receiving").description("받기 링크"),
-                    linkWithRel("profile").description("프로파일 링크")),
-                requestHeaders(
-                    headerWithName(HttpHeaders.ACCEPT).description("Accept 헤더"),
-                    headerWithName(HttpHeaders.CONTENT_TYPE).description("Content-type 헤더"),
-                    headerWithName("X-USER-ID").description("사용자 ID")),
-                pathParameters(parameterWithName("token").description("뿌리기 token")),
-                responseHeaders(
-                    headerWithName(HttpHeaders.CONTENT_TYPE).description("Content-type 헤더")),
-                relaxedResponseFields(
-                    fieldWithPath("createDate").description("뿌린 시각"),
-                    fieldWithPath("totalAmount").description("뿌린 금액"),
-                    fieldWithPath("receivedAmount").description("받기 완료된 금액"),
-                    fieldWithPath("receivingDtos[].amount").description("받은 금액"),
-                    fieldWithPath("receivingDtos[].userId").description("받은 사용자 ID"))));
+    responseSpec.expectStatus().isOk().expectBody(ReadDto.SprinklingDto.class);
   }
+
+  //  @Test
+  //  @DisplayName("요청 Header 누락 테스트")
+  //  void validateHeaderTest01() {
+  //
+  //    // Given
+  //    Request request = Request.builder().amount(20000).people(3).build();
+  //
+  //    // When
+  //    WebTestClient.ResponseSpec responseSpec =
+  //        webClient
+  //            .post()
+  //            .uri("/v1/sprinklings")
+  //            .contentType(MediaType.APPLICATION_JSON)
+  //            .body(Mono.just(request), Request.class)
+  //            .exchange();
+  //
+  //    // Then
+  //    responseSpec.expectStatus().isBadRequest();
+  //  }
+
+  //  @Test
+  //  @DisplayName("요청 Header 값 검증 테스트")
+  //  void validateHeaderTest02() throws Exception {
+  //
+  //    // Given
+  //    Request request = Request.builder().amount(20000).people(3).build();
+  //
+  //    // When
+  //    final ResultActions actions =
+  //        mockMvc.perform(
+  //            post("/v1/sprinklings")
+  //                .header("X-USER-ID", 0)
+  //                .header("X-ROOM-ID", "")
+  //                .contentType(MediaType.APPLICATION_JSON)
+  //                .content(objectMapper.writeValueAsString(request)));
+  //
+  //    // Then
+  //    actions
+  //        .andDo(print())
+  //        .andExpect(status().isBadRequest())
+  //        .andExpect(jsonPath("timestamp").exists())
+  //        .andExpect(jsonPath("status").value(HttpStatus.BAD_REQUEST.name()))
+  //        .andExpect(jsonPath("message").exists())
+  //        .andExpect(jsonPath("debugMessage").exists())
+  //        .andExpect(jsonPath("subErrors").isEmpty());
+  //  }
+  //
+  //  @Test
+  //  @DisplayName("요청 파라미터 값 검증 테스트")
+  //  void validateParameterTest() throws Exception {
+  //
+  //    // Given
+  //    Request request = Request.builder().amount(0).build();
+  //
+  //    // When
+  //    final ResultActions actions =
+  //        mockMvc.perform(
+  //            post("/v1/sprinklings")
+  //                .header("X-USER-ID", 900001)
+  //                .header("X-ROOM-ID", "TEST-ROOM")
+  //                .contentType(MediaType.APPLICATION_JSON)
+  //                .content(objectMapper.writeValueAsString(request)));
+  //
+  //    // Then
+  //    actions
+  //        .andDo(print())
+  //        .andExpect(status().isBadRequest())
+  //        .andExpect(jsonPath("timestamp").exists())
+  //        .andExpect(jsonPath("status").value(HttpStatus.BAD_REQUEST.name()))
+  //        .andExpect(jsonPath("message").exists())
+  //        .andExpect(jsonPath("debugMessage").isEmpty())
+  //        .andExpect(jsonPath("subErrors").exists());
+  //  }
 }

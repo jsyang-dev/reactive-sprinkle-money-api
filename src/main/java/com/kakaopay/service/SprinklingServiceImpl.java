@@ -45,7 +45,7 @@ public class SprinklingServiceImpl implements SprinklingService {
   }
 
   @Override
-  public ReadDto.SprinklingDto read(String token, int userId) {
+  public Mono<ReadDto.SprinklingDto> read(String token, int userId) {
 
     Sprinkling sprinkling =
         sprinklingRepository
@@ -54,7 +54,7 @@ public class SprinklingServiceImpl implements SprinklingService {
 
     validateReading(sprinkling, token, userId);
 
-    return sprinklingMapper.toDto(sprinkling);
+    return Mono.just(sprinklingMapper.toDto(sprinkling));
   }
 
   private void makeReceivingInSprinkling(long amount, int people, Sprinkling sprinkling) {

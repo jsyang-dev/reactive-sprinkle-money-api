@@ -41,9 +41,7 @@ class ReceivingServiceTest {
     people = 3;
     userId = 900001;
     roomId = "TEST-ROOM";
-    token = "";
-    // TODO
-    // sprinklingService.sprinkle(amount, people, userId, roomId);
+    token = sprinklingService.sprinkle(amount, people, userId, roomId).block();
   }
 
   @Test
@@ -54,7 +52,7 @@ class ReceivingServiceTest {
     int receivingUserId = 900002;
 
     // When
-    long receivedAmount = receivingService.receive(token, receivingUserId, roomId);
+    Long receivedAmount = receivingService.receive(token, receivingUserId, roomId).block();
 
     // Then
     assertThat(receivedAmount).isLessThanOrEqualTo(amount);

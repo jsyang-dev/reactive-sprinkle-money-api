@@ -23,5 +23,5 @@ public interface SprinklingService {
    * @param userId 사용자 ID
    * @return 뿌리기 현재 상태
    */
-  SprinklingDto read(String token, int userId);
+  Mono<SprinklingDto> read(String token, int userId);
 }
