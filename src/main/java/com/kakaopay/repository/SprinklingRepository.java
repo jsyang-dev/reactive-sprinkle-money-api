@@ -1,13 +1,11 @@
 package com.kakaopay.repository;
 
 import com.kakaopay.domain.Sprinkling;
-import org.springframework.data.jpa.repository.EntityGraph;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.Optional;
 
-public interface SprinklingRepository extends JpaRepository<Sprinkling, Long> {
+public interface SprinklingRepository extends MongoRepository<Sprinkling, Long> {
 
-  @EntityGraph(attributePaths = "receivings")
   Optional<Sprinkling> findByToken(String token);
 }

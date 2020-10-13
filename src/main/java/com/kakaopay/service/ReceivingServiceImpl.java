@@ -31,14 +31,15 @@ public class ReceivingServiceImpl implements ReceivingService {
 
     validateReceiving(sprinkling, userId, roomId);
 
-    Receiving remainReceiving =
-        sprinkling.getReceivings().stream()
-            .filter(Receiving::isNotReceived)
-            .findFirst()
-            .orElseThrow(() -> new ReceivingCompletedException(token));
-
-    remainReceiving.setUserId(userId);
-    return Mono.just(remainReceiving.getAmount());
+    return Mono.just(0L);
+    //    Receiving remainReceiving =
+    //        sprinkling.getReceivings().stream()
+    //            .filter(Receiving::isNotReceived)
+    //            .findFirst()
+    //            .orElseThrow(() -> new ReceivingCompletedException(token));
+    //
+    //    remainReceiving.setUserId(userId);
+    //    return Mono.just(remainReceiving.getAmount());
   }
 
   private void validateReceiving(Sprinkling sprinkling, int userId, String roomId) {
@@ -52,8 +53,8 @@ public class ReceivingServiceImpl implements ReceivingService {
     if (sprinkling.isDifferentRoom(roomId)) {
       throw new DifferentRoomException(roomId);
     }
-    if (sprinkling.isReceivingExpired()) {
-      throw new ReceivingExpiredException(sprinkling.getCreateDate());
-    }
+    //    if (sprinkling.isReceivingExpired()) {
+    //      throw new ReceivingExpiredException(sprinkling.getCreateDate());
+    //    }
   }
 }

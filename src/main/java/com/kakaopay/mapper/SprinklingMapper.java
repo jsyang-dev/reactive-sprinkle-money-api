@@ -10,6 +10,6 @@ import org.mapstruct.ReportingPolicy;
 public interface SprinklingMapper {
 
   @Mapping(source = "amount", target = "totalAmount")
-  @Mapping(source = "receivings", target = "receivingDtos")
+  //  @Mapping(source = "receivings", target = "receivingDtos")
   SprinklingDto toDto(Sprinkling sprinkling);
 }

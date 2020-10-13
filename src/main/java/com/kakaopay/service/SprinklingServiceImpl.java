@@ -71,7 +71,7 @@ public class SprinklingServiceImpl implements SprinklingService {
       remainAmount -= sprinklingAmount;
 
       Receiving receiving = Receiving.builder().amount(sprinklingAmount).build();
-      sprinkling.addReceiving(receiving);
+      //      sprinkling.addReceiving(receiving);
     }
   }
 
@@ -80,8 +80,8 @@ public class SprinklingServiceImpl implements SprinklingService {
     if (sprinkling.isPermissionDenied(userId)) {
       throw new PermissionDeniedException(token);
     }
-    if (sprinkling.isReadExpired()) {
-      throw new ReadExpiredException(sprinkling.getCreateDate());
-    }
+    //    if (sprinkling.isReadExpired()) {
+    //      throw new ReadExpiredException(sprinkling.getCreateDate());
+    //    }
   }
 }

@@ -111,7 +111,8 @@ class ReceivingServiceTest {
         sprinklingRepository
             .findByToken(token)
             .orElseThrow(() -> new AssertionError("Test failed"));
-    distribution.setCreateDate(LocalDateTime.now().minusSeconds(EXPIRE_RECEIVING_SECONDS + 1));
+    //    distribution.setCreateDate(LocalDateTime.now().minusSeconds(EXPIRE_RECEIVING_SECONDS +
+    // 1));
 
     // When & Then
     assertThatThrownBy(() -> receivingService.receive(token, receivingUserId, roomId))
