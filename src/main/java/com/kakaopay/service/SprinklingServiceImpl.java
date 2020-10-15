@@ -8,6 +8,7 @@ import com.kakaopay.exception.PermissionDeniedException;
 import com.kakaopay.exception.ReadExpiredException;
 import com.kakaopay.exception.SprinklingNotFoundException;
 import com.kakaopay.mapper.SprinklingMapper;
+import com.kakaopay.repository.ReceivingRepository;
 import com.kakaopay.repository.SprinklingRepository;
 import com.kakaopay.util.RandomUtils;
 import lombok.RequiredArgsConstructor;
@@ -15,11 +16,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class SprinklingServiceImpl implements SprinklingService {
 
   private final SprinklingRepository sprinklingRepository;
+  private final ReceivingRepository receivingRepository;
   private final SprinklingMapper sprinklingMapper;
 
   @Override
@@ -30,16 +35,17 @@ public class SprinklingServiceImpl implements SprinklingService {
       throw new InsufficientAmountException(amount, people);
     }
 
+    String token = RandomUtils.generateToken();
     Sprinkling sprinkling =
         Sprinkling.builder()
-            .token(RandomUtils.generateToken())
+            .token(token)
             .amount(amount)
             .people(people)
             .roomId(roomId)
             .userId(userId)
             .build();
 
-    makeReceivingInSprinkling(amount, people, sprinkling);
+    receivingRepository.saveAll(makeReceivings(token, amount, people));
 
     return Mono.just(sprinklingRepository.save(sprinkling).getToken());
   }
@@ -57,7 +63,9 @@ public class SprinklingServiceImpl implements SprinklingService {
     return Mono.just(sprinklingMapper.toDto(sprinkling));
   }
 
-  private void makeReceivingInSprinkling(long amount, int people, Sprinkling sprinkling) {
+  private List<Receiving> makeReceivings(String token, long amount, int people) {
+
+    List<Receiving> receivings = new ArrayList<>();
 
     long remainAmount = amount;
     for (int remainPeople = people; remainPeople > 0; remainPeople--) {
@@ -70,9 +78,10 @@ public class SprinklingServiceImpl implements SprinklingService {
       }
       remainAmount -= sprinklingAmount;
 
-      Receiving receiving = Receiving.builder().amount(sprinklingAmount).build();
-      //      sprinkling.addReceiving(receiving);
+      receivings.add(Receiving.builder().token(token).amount(sprinklingAmount).build());
     }
+
+    return receivings;
   }
 
   private void validateReading(Sprinkling sprinkling, String token, int userId) {

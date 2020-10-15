@@ -7,6 +7,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+
+import static com.kakaopay.constant.SprinklingConstant.EXPIRE_READ_SECONDS;
+import static com.kakaopay.constant.SprinklingConstant.EXPIRE_RECEIVING_SECONDS;
+
 @Document
 @Getter
 @Builder
@@ -37,13 +43,6 @@ public class Sprinkling extends BaseEntity {
   //    receiving.setSprinkling(this);
   //  }
 
-  public boolean isReceivingUserDuplicated(int userId) {
-    return true;
-    //    return receivings.stream()
-    //        .map(receiving -> Optional.ofNullable(receiving.getUserId()).orElse(0))
-    //        .anyMatch(receiving -> receiving == userId);
-  }
-
   public boolean isSprinklingUserDuplicated(int userId) {
     return this.userId == userId;
   }
@@ -53,10 +52,8 @@ public class Sprinkling extends BaseEntity {
   }
 
   public boolean isReceivingExpired() {
-    return true;
-    //    long secondsGap = Duration.between(super.getCreateDate(),
-    // LocalDateTime.now()).getSeconds();
-    //    return secondsGap > EXPIRE_RECEIVING_SECONDS;
+    long secondsGap = Duration.between(super.getCreateDate(), LocalDateTime.now()).getSeconds();
+    return secondsGap > EXPIRE_RECEIVING_SECONDS;
   }
 
   public boolean isPermissionDenied(int userId) {
@@ -64,9 +61,7 @@ public class Sprinkling extends BaseEntity {
   }
 
   public boolean isReadExpired() {
-    return true;
-    //    long secondsGap = Duration.between(super.getCreateDate(),
-    // LocalDateTime.now()).getSeconds();
-    //    return secondsGap > EXPIRE_READ_SECONDS;
+    long secondsGap = Duration.between(super.getCreateDate(), LocalDateTime.now()).getSeconds();
+    return secondsGap > EXPIRE_READ_SECONDS;
   }
 }

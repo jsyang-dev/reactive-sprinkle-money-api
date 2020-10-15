@@ -16,11 +16,14 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Receiving extends BaseEntity {
 
+  // token
+  private String token;
+
   // 받은 금액
   private Long amount;
 
   // 받은 사용자
-  private Integer userId;
+  @Builder.Default private Integer userId = -1;
 
   // Lock 버전
   private Integer version;
@@ -28,6 +31,6 @@ public class Receiving extends BaseEntity {
   private Sprinkling sprinkling;
 
   public boolean isNotReceived() {
-    return userId == null;
+    return userId == -1;
   }
 }
