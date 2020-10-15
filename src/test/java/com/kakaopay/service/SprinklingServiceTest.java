@@ -1,6 +1,5 @@
 package com.kakaopay.service;
 
-import com.kakaopay.domain.Receiving;
 import com.kakaopay.domain.Sprinkling;
 import com.kakaopay.dto.ReadDto.SprinklingDto;
 import com.kakaopay.exception.InsufficientAmountException;
@@ -15,10 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-
-import static com.kakaopay.contant.SprinklingConstant.EXPIRE_READ_SECONDS;
-import static com.kakaopay.contant.SprinklingConstant.TOKEN_LENGTH;
+import static com.kakaopay.constant.SprinklingConstant.TOKEN_LENGTH;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
