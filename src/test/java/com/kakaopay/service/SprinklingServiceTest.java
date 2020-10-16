@@ -14,6 +14,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+
+import static com.kakaopay.constant.SprinklingConstant.EXPIRE_READ_SECONDS;
 import static com.kakaopay.constant.SprinklingConstant.TOKEN_LENGTH;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -99,7 +102,7 @@ class SprinklingServiceTest {
     // Given
     int receivingUserId = 900002;
     String token = sprinklingService.sprinkle(amount, people, userId, roomId).block();
-    //    long receivedAmount = receivingService.receive(token, receivingUserId, roomId);
+    long receivedAmount = receivingService.receive(token, receivingUserId, roomId).block();
 
     // When
     SprinklingDto sprinklingDto = sprinklingService.read(token, userId).block();
@@ -108,7 +111,7 @@ class SprinklingServiceTest {
     assert sprinklingDto != null;
     assertThat(sprinklingDto.getCreateDate()).isNotNull();
     assertThat(sprinklingDto.getTotalAmount()).isEqualTo(amount);
-    //    assertThat(sprinklingDto.getReceivedAmount()).isEqualTo(receivedAmount);
+    assertThat(sprinklingDto.getReceivedAmount()).isEqualTo(receivedAmount);
     assertThat(sprinklingDto.getReceivingDtos()).hasSize(people);
   }
 
@@ -129,7 +132,6 @@ class SprinklingServiceTest {
 
   @Test
   @DisplayName("뿌린지 7일이 지난 조회 요청은 예외 발생")
-  @Transactional
   void readTest03() {
 
     // Given
@@ -139,7 +141,8 @@ class SprinklingServiceTest {
         sprinklingRepository
             .findByToken(token)
             .orElseThrow(() -> new AssertionError("Test failed"));
-    //    sprinkling.setCreateDate(LocalDateTime.now().minusSeconds(EXPIRE_READ_SECONDS + 1));
+    sprinkling.setCreateDate(LocalDateTime.now().minusSeconds(EXPIRE_READ_SECONDS + 1));
+    sprinklingRepository.save(sprinkling);
 
     // When & Then
     assertThatThrownBy(() -> sprinklingService.read(token, userId))

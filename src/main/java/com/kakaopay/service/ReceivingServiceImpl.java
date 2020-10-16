@@ -48,7 +48,7 @@ public class ReceivingServiceImpl implements ReceivingService {
             .orElseThrow(() -> new ReceivingCompletedException(token));
 
     remainReceiving.setUserId(userId);
-    return Mono.just(remainReceiving.getAmount());
+    return Mono.just(receivingRepository.save(remainReceiving).getAmount());
   }
 
   private void validateReceiving(Sprinkling sprinkling, int userId, String roomId) {

@@ -28,12 +28,12 @@ public class ReadDto {
 
     private List<ReceivingDto> receivingDtos;
 
-    //    public Long getReceivedAmount() {
-    //      return receivingDtos.stream()
-    //          .filter(receivingDto -> Optional.ofNullable(receivingDto.getUserId()).orElse(0) > 0)
-    //          .map(ReceivingDto::getAmount)
-    //          .reduce(0L, Long::sum);
-    //    }
+    public Long getReceivedAmount() {
+      return receivingDtos.stream()
+          .filter(receivingDto -> Optional.ofNullable(receivingDto.getUserId()).orElse(0) > 0)
+          .map(ReceivingDto::getAmount)
+          .reduce(0L, Long::sum);
+    }
   }
 
   @Getter

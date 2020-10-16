@@ -60,7 +60,9 @@ public class SprinklingServiceImpl implements SprinklingService {
 
     validateReading(sprinkling, token, userId);
 
-    return Mono.just(sprinklingMapper.toDto(sprinkling));
+    List<Receiving> receivings = receivingRepository.findAllByToken(token);
+
+    return Mono.just(sprinklingMapper.toDto(sprinkling, receivings));
   }
 
   private List<Receiving> makeReceivings(String token, long amount, int people) {
@@ -89,8 +91,8 @@ public class SprinklingServiceImpl implements SprinklingService {
     if (sprinkling.isPermissionDenied(userId)) {
       throw new PermissionDeniedException(token);
     }
-    //    if (sprinkling.isReadExpired()) {
-    //      throw new ReadExpiredException(sprinkling.getCreateDate());
-    //    }
+    if (sprinkling.isReadExpired()) {
+      throw new ReadExpiredException(sprinkling.getCreateDate());
+    }
   }
 }

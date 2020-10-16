@@ -15,6 +15,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+
+import static com.kakaopay.constant.SprinklingConstant.EXPIRE_RECEIVING_SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -98,18 +101,17 @@ class ReceivingServiceTest {
 
   @Test
   @DisplayName("뿌린지 10분이 지난 받기 요청은 예외 발생")
-  @Transactional
   void receiveTest05() {
 
     // Given
     int receivingUserId = 900002;
 
-    Sprinkling distribution =
+    Sprinkling sprinkling =
         sprinklingRepository
             .findByToken(token)
             .orElseThrow(() -> new AssertionError("Test failed"));
-    //    distribution.setCreateDate(LocalDateTime.now().minusSeconds(EXPIRE_RECEIVING_SECONDS +
-    // 1));
+    sprinkling.setCreateDate(LocalDateTime.now().minusSeconds(EXPIRE_RECEIVING_SECONDS + 1));
+    sprinklingRepository.save(sprinkling);
 
     // When & Then
     assertThatThrownBy(() -> receivingService.receive(token, receivingUserId, roomId))
