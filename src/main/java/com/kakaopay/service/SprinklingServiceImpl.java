@@ -58,7 +58,7 @@ public class SprinklingServiceImpl implements SprinklingService {
             .findByToken(token)
             .orElseThrow(() -> new SprinklingNotFoundException(token));
 
-    validateReading(sprinkling, token, userId);
+    validateReading(sprinkling, userId);
 
     List<Receiving> receivings = receivingRepository.findAllByToken(token);
 
@@ -86,10 +86,10 @@ public class SprinklingServiceImpl implements SprinklingService {
     return receivings;
   }
 
-  private void validateReading(Sprinkling sprinkling, String token, int userId) {
+  private void validateReading(Sprinkling sprinkling, int userId) {
 
     if (sprinkling.isPermissionDenied(userId)) {
-      throw new PermissionDeniedException(token);
+      throw new PermissionDeniedException(sprinkling.getToken());
     }
     if (sprinkling.isReadExpired()) {
       throw new ReadExpiredException(sprinkling.getCreateDate());
